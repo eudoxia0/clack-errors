@@ -1,0 +1,53 @@
+{namespace error-page}
+
+{template index}
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>Error</title>
+      <style>
+       //TODO: Ask fukamachi if you can have multiple static middlewares
+       
+      </style>
+    </head>
+    <body>
+      <header>
+        <span class='error-name'>{$name}</span>
+        <span class='date-time'>{$datetime}</span>
+        <span class='method'>{$method}</span>
+        <span class='url'>{$url}</span>
+      </header>
+      <div class='slots'>
+        <h2>Slots</h2>
+        <dl>
+          {foreach $slot in $slots}
+          <dt>
+            <pre class='slot-name'>{$slot[0]}</pre> 
+          </dt>
+          <dd>
+            <pre class='slot-value'>
+              {if $slot[1]}
+                {$slot[1]}
+              {else}
+                NIL
+              {/if}
+            </pre>
+          </dd>
+          {/foreach}
+        </dl>
+      </div>
+      <div class='backtrace'>
+        <h2>Backtrace</h2>
+        {foreach $frame in $backtrace}
+          <div class='frame'>
+            <pre>
+              <code>
+                {$frame}
+              </code>
+            </pre>
+          </div>
+        {/foreach}
+      </div>
+    </body>
+  </html>
+{/template}
