@@ -13,7 +13,12 @@
                :trivial-backtrace
                :closure-template
                :cl-ppcre)
-  :components ((:module "src"
+  :serial t
+  :components ((:module "static"
+                :components
+                ((:static-file "style.css")))
+               (:module "src"
+                :serial t
                 :components
                 ((:closure-template "error-page")
                  (:file "clack-errors"))))

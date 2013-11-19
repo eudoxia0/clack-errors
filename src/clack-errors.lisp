@@ -1,8 +1,22 @@
 (in-package :cl-user)
 (defpackage clack-errors
   (:use :cl :clack :clack.response)
+  (:import-from :trivial-backtrace
+                :print-backtrace)
   (:export :<clack-error-middleware>))
 (in-package :clack-errors)
+
+(defun slurp-file (path)
+  ;; Credit: http://www.ymeme.com/slurping-a-file-common-lisp-83.html
+  (with-open-file (stream path)
+    (let ((seq (make-array (file-length stream) :element-type 'character :fill-pointer t)))
+      (setf (fill-pointer seq) (read-sequence seq stream))
+      seq)))
+
+(defparameter *css-path*
+  (merge-pathnames
+   #p"static/style.css"
+   (asdf:component-pathname (asdf:find-system :clack-errors))))
 
 (defclass <clack-error-middleware> (<middleware>) ())
 
@@ -23,7 +37,7 @@
 (defun split-backtrace (str)
   (ppcre:split +backtrace-regex+ str))
 
-(defun parse-backtrace (bt ex)
+(defun parse-backtrace (bt)
   (destructuring-bind (header &rest frames) (split-backtrace bt)
     (let ((error-msg (subseq header
                              (position #\: header :from-end t)))
@@ -32,22 +46,30 @@
                              (position #\A header))))
       (list error-msg date-time frames))))
 
+(defparameter *env* nil)
+
 (defun render (bt ex env)
-  (let* ((backtrace (parse-backtrace bt ex)))
-    (format t "~A" env)
+  (let* ((backtrace (parse-backtrace bt)))
+    (setf *env* env)
     (error-page:index
      (list :name (ex-name ex)
            :slots (slot-values ex)
-           :msg (nth 0 backtrace)
            :datetime (nth 1 backtrace)
-           :backtrace (caddr backtrace)
+           :backtrace (subseq (caddr backtrace) 6)
            :url (getf env :path-info)
            :method (getf env :request-method)
-           :query (getf env :query-string)))))
+           :query (getf env :query-string)
+           :css (slurp-file *css-path*)
+           :env (loop for (key value) on env by #'cddr collecting
+                      (list key value))))))
  
 (defmethod call ((this <clack-error-middleware>) env)
-  (handler-case (call-next this env)
-    (t (ex)
-      (let ((bt (trivial-backtrace:print-backtrace ex :output nil)))
-        (list 200 '(:content-type "text/html")
-              (list (render bt ex env)))))))
+  (let ((str (make-string-output-stream)))
+    (handler-case (handler-bind
+                      ((t #'(lambda (condition)
+                              (write-string (print-backtrace condition :output nil) str))))
+                    (call-next this env))
+      (t (ex) (list
+               200
+               '(:content-type "text/html")
+               (list (render (get-output-stream-string str) ex env)))))))
