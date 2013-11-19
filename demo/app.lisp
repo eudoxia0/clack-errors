@@ -29,6 +29,7 @@
   (clack:clackup
    (builder
     clack-errors:<clack-error-middleware>
-    *app*)))
+    *app*)
+   :port 8000))
 
 (defun stop () (clack:stop *handler*))
