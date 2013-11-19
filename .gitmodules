@@ -1,0 +1,3 @@
+[submodule "static/highlight-lisp"]
+	path = static/highlight-lisp
+	url = https://github.com/orthecreedence/highlight-lisp.git
