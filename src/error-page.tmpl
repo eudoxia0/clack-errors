@@ -2,51 +2,65 @@
 
 {template index}
   <!DOCTYPE html>
-  <html>
+  <html lang="en">
     <head>
-      <title>Error</title>
+      <title>{$name} at {$url}</title>
       <style>
-       //TODO: Ask fukamachi if you can have multiple static middlewares
-       
+        // TODO: Ask fukamachi how to have multiple static middlewares
+       {$css}
       </style>
     </head>
     <body>
       <header>
-        <span class='error-name'>{$name}</span>
-        <span class='date-time'>{$datetime}</span>
-        <span class='method'>{$method}</span>
-        <span class='url'>{$url}</span>
+        <h1 class='error-name'>{$name}
+          <small class='url'>{$url}</small></h1>
+        <span class='date-time'>at {$datetime}</span>
       </header>
-      <div class='slots'>
+      <ol class='backtrace col-md-6'>
+        <h2>Backtrace</h2>
+        {foreach $frame in $backtrace}
+          <li class='frame'>
+            <pre>
+              {$frame}
+            </pre>
+          </li>
+        {/foreach}
+      </ol>
+      <div class='col-md-6'>
         <h2>Slots</h2>
-        <dl>
+        <dl class='dl-horizontal'>
           {foreach $slot in $slots}
           <dt>
-            <pre class='slot-name'>{$slot[0]}</pre> 
+            <code class='slot-name'>{$slot[0]}</code> 
           </dt>
           <dd>
-            <pre class='slot-value'>
+            <code class='slot-value'>
               {if $slot[1]}
                 {$slot[1]}
               {else}
                 NIL
               {/if}
-            </pre>
+            </code>
           </dd>
           {/foreach}
         </dl>
-      </div>
-      <div class='backtrace'>
-        <h2>Backtrace</h2>
-        {foreach $frame in $backtrace}
-          <div class='frame'>
-            <pre>
-              <code>
-                {$frame}
-              </code>
-            </pre>
-          </div>
-        {/foreach}
+        <h2>Request</h2>
+        <dl class='dl-horizontal'>
+          {foreach $pair in $env}
+          <dt>
+            <code class='param-name'>{$pair[0]}</code> 
+          </dt>
+          <dd>
+            <code class='param-value'>
+              {if $pair[1]}
+                {$pair[1]}
+              {else}
+                NIL
+              {/if}
+            </code>
+          </dd>
+          {/foreach}
+        </dl>
       </div>
     </body>
   </html>
