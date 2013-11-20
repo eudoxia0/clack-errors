@@ -18,6 +18,16 @@
    #p"static/style.css"
    (asdf:component-pathname (asdf:find-system :clack-errors))))
 
+(defparameter *highlight-css*
+  (merge-pathnames
+   #p"static/highlight-lisp/themes/github.css"
+   (asdf:component-pathname (asdf:find-system :clack-errors))))
+
+(defparameter *highlight-js*
+  (merge-pathnames
+   #p"static/highlight-lisp/highlight-lisp.js"
+   (asdf:component-pathname (asdf:find-system :clack-errors))))
+
 (defclass <clack-error-middleware> (<middleware>) ())
 
 (defun ex-name (ex)
@@ -59,7 +69,10 @@
            :url (getf env :path-info)
            :method (getf env :request-method)
            :query (getf env :query-string)
-           :css (slurp-file *css-path*)
+           :css (concatenate 'string
+                             (slurp-file *css-path*)
+                             (slurp-file *highlight-css*))
+           :js (slurp-file *highlight-js*)
            :env (loop for (key value) on env by #'cddr collecting
                       (list key value))))))
  
