@@ -1,7 +1,31 @@
 body {
-    margin: 10px;
+    margin: 15px;
+    color: #333;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
-dt, dd {
-    padding: 3px;
+.lisp *, .param-name, .param-value {
+    font-size: 13px;
+    font-family: Monaco,Menlo,Consolas,"Courier New",monospace;
+}
+
+header {
+    padding: 10px 30px;
+}
+
+.backtrace, .req, .slots, hr {
+    float: left; padding: 0 10px;
+}
+
+.backtrace { width: 55%; }
+.slots, .req, hr { width: 40%; }
+
+.backtrace pre { overflow: hidden; }
+.backtrace ol { padding-left: 0; }
+
+.slot-value code { width: 40%; }
+
+hr {
+    margin: 25px 10px;
+    border: 1px solid #333;
 }

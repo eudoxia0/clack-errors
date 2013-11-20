@@ -4,48 +4,60 @@
   <!DOCTYPE html>
   <html lang="en">
     <head>
-      <title>{$name} at {$url}</title>
+      <title>{$name} @ {$url}</title>
       <style>
         // TODO: Ask fukamachi how to have multiple static middlewares
-       {$css}
+        {$css|noAutoescape}
       </style>
+      <script>
+        {$js|noAutoescape}
+      </script>
     </head>
     <body>
       <header>
         <h1 class='error-name'>{$name}
           <small class='url'>{$url}</small></h1>
-        <span class='date-time'>at {$datetime}</span>
+        <span class='date-time'>{$datetime}</span>
       </header>
-      <ol class='backtrace col-md-6'>
+      <div class='backtrace'>
         <h2>Backtrace</h2>
-        {foreach $frame in $backtrace}
-          <li class='frame'>
-            <pre>
-              {$frame}
-            </pre>
-          </li>
-        {/foreach}
-      </ol>
-      <div class='col-md-6'>
+        <ol>
+          {foreach $frame in $backtrace}
+            <li class='frame'>
+              <pre>
+                <code class='lisp'>
+                  {$frame}
+                </code>
+              </pre>
+            </li>
+          {/foreach}
+        </ol>
+      </div>
+      <div class='slots'>
         <h2>Slots</h2>
-        <dl class='dl-horizontal'>
+        <dl>
           {foreach $slot in $slots}
           <dt>
             <code class='slot-name'>{$slot[0]}</code> 
           </dt>
           <dd>
-            <code class='slot-value'>
-              {if $slot[1]}
-                {$slot[1]}
-              {else}
-                NIL
-              {/if}
-            </code>
+            <pre>
+              <code class='slot-value lisp'>
+                {if $slot[1]}
+                  {$slot[1]}
+                {else}
+                  NIL
+                {/if}
+              </code>
+            </pre>
           </dd>
           {/foreach}
         </dl>
+      </div>
+      <hr>
+      <div class='req'>
         <h2>Request</h2>
-        <dl class='dl-horizontal'>
+        <dl>
           {foreach $pair in $env}
           <dt>
             <code class='param-name'>{$pair[0]}</code> 
@@ -62,6 +74,9 @@
           {/foreach}
         </dl>
       </div>
+      <script>
+        HighlightLisp.highlight_auto();
+      </script>
     </body>
   </html>
 {/template}
