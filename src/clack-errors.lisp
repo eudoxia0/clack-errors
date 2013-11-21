@@ -28,10 +28,14 @@
    #p"static/highlight-lisp/highlight-lisp.js"
    (asdf:component-pathname (asdf:find-system :clack-errors))))
 
-(defparameter *debug* nil
-  "If T, show the full backtrace etc.. If NIL, just a simple error page.")
-
-(defclass <clack-error-middleware> (<middleware>) ())
+(defclass <clack-error-middleware> (<middleware>)
+  ((debug :type boolean
+          :initarg :debug
+          :accessor debug-p
+          :initform t
+          :documentation "If T, show the full backtrace etc.
+If NIL, just a simple error page."))
+  (:documentation "Middleware to catch errors."))
 
 (defun ex-name (ex)
   (symbol-name (mop-utils:class-name-of ex)))
@@ -89,6 +93,6 @@
       (t (ex) (list
                200
                '(:content-type "text/html")
-               (list (if *debug*
+               (list (if (debug-p this)
                          (render (get-output-stream-string str) ex env)
                          (render-prod ex env))))))))
