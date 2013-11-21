@@ -56,11 +56,8 @@
                              (position #\A header))))
       (list error-msg date-time frames))))
 
-(defparameter *env* nil)
-
 (defun render (bt ex env)
   (let* ((backtrace (parse-backtrace bt)))
-    (setf *env* env)
     (error-page:index
      (list :name (ex-name ex)
            :slots (slot-values ex)
