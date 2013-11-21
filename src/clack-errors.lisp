@@ -28,6 +28,9 @@
    #p"static/highlight-lisp/highlight-lisp.js"
    (asdf:component-pathname (asdf:find-system :clack-errors))))
 
+(defparameter *debug* nil
+  "If T, show the full backtrace etc.. If NIL, just a simple error page.")
+
 (defclass <clack-error-middleware> (<middleware>) ())
 
 (defun ex-name (ex)
@@ -72,6 +75,10 @@
            :js (slurp-file *highlight-js*)
            :env (loop for (key value) on env by #'cddr collecting
                       (list key value))))))
+
+(defun render-prod (ex env)
+  (prod-page:index (list :name (ex-name ex)
+                         :url (getf env :path-info))))
  
 (defmethod call ((this <clack-error-middleware>) env)
   (let ((str (make-string-output-stream)))
@@ -82,4 +89,6 @@
       (t (ex) (list
                200
                '(:content-type "text/html")
-               (list (render (get-output-stream-string str) ex env)))))))
+               (list (if *debug*
+                         (render (get-output-stream-string str) ex env)
+                         (render-prod ex env))))))))
