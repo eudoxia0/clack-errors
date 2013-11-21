@@ -13,9 +13,14 @@
       (setf (fill-pointer seq) (read-sequence seq stream))
       seq)))
 
-(defparameter *css-path*
+(defparameter *dev-css-path*
   (merge-pathnames
-   #p"static/style.css"
+   #p"static/style-dev.css"
+   (asdf:component-pathname (asdf:find-system :clack-errors))))
+
+(defparameter *prod-css-path*
+  (merge-pathnames
+   #p"static/style-prod.css"
    (asdf:component-pathname (asdf:find-system :clack-errors))))
 
 (defparameter *highlight-css*
@@ -65,7 +70,7 @@ If NIL, just a simple error page."))
 
 (defun render (bt ex env)
   (let* ((backtrace (parse-backtrace bt)))
-    (error-page:index
+    (dev-page:index
      (list :name (ex-name ex)
            :slots (slot-values ex)
            :datetime (nth 1 backtrace)
@@ -74,7 +79,7 @@ If NIL, just a simple error page."))
            :method (getf env :request-method)
            :query (getf env :query-string)
            :css (concatenate 'string
-                             (slurp-file *css-path*)
+                             (slurp-file *dev-css-path*)
                              (slurp-file *highlight-css*))
            :js (slurp-file *highlight-js*)
            :env (loop for (key value) on env by #'cddr collecting
@@ -82,7 +87,8 @@ If NIL, just a simple error page."))
 
 (defun render-prod (ex env)
   (prod-page:index (list :name (ex-name ex)
-                         :url (getf env :path-info))))
+                         :url (getf env :path-info)
+                         :css (slurp-file *prod-css-path*))))
  
 (defmethod call ((this <clack-error-middleware>) env)
   (let ((str (make-string-output-stream)))
