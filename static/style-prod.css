@@ -1,0 +1,9 @@
+header {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    color: #333;
+    width: 40%;
+    margin: 0 auto;
+    text-align: center;
+    border: 3px solid #b94a48; /* Thanks Bootstrap */
+    font-weight: bold;
+}
