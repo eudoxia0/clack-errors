@@ -17,11 +17,12 @@
   :serial t
   :components ((:module "static"
                 :components
-                ((:static-file "style.css")))
+                ((:static-file "style-dev.css")
+                 (:static-file "style-prod.css")))
                (:module "src"
                 :serial t
                 :components
-                ((:closure-template "error-page")
+                ((:closure-template "dev-page")
                  (:closure-template "prod-page")
                  (:file "clack-errors"))))
   :long-description
