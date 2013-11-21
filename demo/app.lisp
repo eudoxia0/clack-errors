@@ -28,7 +28,8 @@
 (defparameter *handler*
   (clack:clackup
    (builder
-    clack-errors:<clack-error-middleware>
+    (clack-errors:<clack-error-middleware>
+     :debug t)
     *app*)
    :port 8000))
 
