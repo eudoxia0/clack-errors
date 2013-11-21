@@ -1,4 +1,4 @@
-![Screenshot](https://raw.github.com/eudoxia0/clack-errors/master/screenshot.png)
+![Screenshot](https://raw.github.com/eudoxia0/clack-errors/master/screenshot-dev.png)
 
 A clone of [better_errors](https://github.com/charliesome/better_errors)
 for [Clack](https://github.com/fukamachi/clack).
