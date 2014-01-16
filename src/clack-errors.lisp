@@ -42,11 +42,13 @@
 If NIL, just a simple error page."))
   (:documentation "Middleware to catch errors."))
 
+
 (defun ex-name (ex)
-  (symbol-name (mop-utils:class-name-of ex)))
+  (symbol-name (class-name (class-of ex))))
 
 (defun ex-slots (ex)
-  (mop-utils:slot-names-of ex))
+  (mapcar #'closer-mop:slot-definition-name
+	  (closer-mop:class-slots (class-of ex))))
 
 (defun slot-values (obj)
   (loop for slot in (ex-slots obj)
@@ -97,7 +99,7 @@ If NIL, just a simple error page."))
                               (write-string (print-backtrace condition :output nil) str))))
                     (call-next this env))
       (t (ex) (list
-               200
+               500
                '(:content-type "text/html")
                (list (if (debug-p this)
                          (render (get-output-stream-string str) ex env)

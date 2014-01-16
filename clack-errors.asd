@@ -8,9 +8,10 @@
   :author "Fernando Borretti"
   :license "LLGPL"
   :description "Error page middleware for Clack."
-  :defsystem-depends-on (#:closure-template)
+  :defsystem-depends-on (:closure-template)
   :depends-on (:clack
-               :mop-utils
+               :closer-mop
+               :local-time
                :trivial-backtrace
                :closure-template
                :cl-ppcre)
