@@ -33,25 +33,15 @@
    #p"static/highlight-lisp/highlight-lisp.js"
    (asdf:component-pathname (asdf:find-system :clack-errors))))
 
-(defclass <clack-error-middleware> (<middleware>)
-  ((debug :type boolean
-          :initarg :debug
-          :accessor debug-p
-          :initform t
-          :documentation "If T, show the full backtrace etc.
-If NIL, just a simple error page."))
-  (:documentation "Middleware to catch errors."))
+(defun condition-name (condition)
+  (symbol-name (class-name (class-of condition))))
 
-
-(defun ex-name (ex)
-  (symbol-name (class-name (class-of ex))))
-
-(defun ex-slots (ex)
+(defun condition-slots (condition)
   (mapcar #'closer-mop:slot-definition-name
-	  (closer-mop:class-slots (class-of ex))))
+	  (closer-mop:class-slots (class-of condition))))
 
 (defun slot-values (obj)
-  (loop for slot in (ex-slots obj)
+  (loop for slot in (condition-slots obj)
         collecting
         (list (symbol-name slot) (slot-value obj slot))))
 
@@ -70,11 +60,11 @@ If NIL, just a simple error page."))
                              (position #\A header))))
       (list error-msg date-time frames))))
 
-(defun render (bt ex env)
+(defun render (bt condition env)
   (let* ((backtrace (parse-backtrace bt)))
     (dev-page:index
-     (list :name (ex-name ex)
-           :slots (slot-values ex)
+     (list :name (condition-name condition)
+           :slots (slot-values condition)
            :datetime (nth 1 backtrace)
            :backtrace (subseq (caddr backtrace) 6)
            :url (getf env :path-info)
@@ -87,20 +77,40 @@ If NIL, just a simple error page."))
            :env (loop for (key value) on env by #'cddr collecting
                       (list key value))))))
 
-(defun render-prod (ex env)
-  (prod-page:index (list :name (ex-name ex)
+(defun render-prod (condition env)
+  (prod-page:index (list :name (ex-name condition)
                          :url (getf env :path-info)
                          :css (slurp-file *prod-css-path*))))
  
+(defclass <clack-error-middleware> (<middleware>)
+  ((debug :type boolean
+          :initarg :debug
+          :accessor debugp
+          :initform t
+          :documentation "If T, show the full backtrace etc.
+If NIL, just a simple error page.")
+   (fn :type function
+       :initarg :fn
+       :accessor fn
+       :initform (lambda (debugp backtrace condition env)
+                   (if debugp
+                       (render backtrace condition env)
+                       (render-prod condition env)))
+       :documentation "The function that renders the error."))
+  (:documentation "Middleware to catch errors."))
+
 (defmethod call ((this <clack-error-middleware>) env)
   (let ((str (make-string-output-stream)))
     (handler-case (handler-bind
                       ((t #'(lambda (condition)
-                              (write-string (print-backtrace condition :output nil) str))))
+                              (write-string (print-backtrace condition :output nil)
+                                            str))))
                     (call-next this env))
-      (t (ex) (list
-               500
-               '(:content-type "text/html")
-               (list (if (debug-p this)
-                         (render (get-output-stream-string str) ex env)
-                         (render-prod ex env))))))))
+      (t (condition) (list
+                      500
+                      '(:content-type "text/html")
+                      (list (funcall (fn this)
+                                     (debugp this)
+                                     (get-output-stream-string str)
+                                     condition
+                                     env)))))))
