@@ -92,11 +92,17 @@ If NIL, just a simple error page.")
    (fn :type function
        :initarg :fn
        :accessor fn
-       :initform (lambda (debugp backtrace condition env)
+       :initform (lambda (debugp prod-renderer backtrace condition env)
                    (if debugp
                        (render backtrace condition env)
-                       (render-prod condition env)))
-       :documentation "The function that renders the error."))
+                       (funcall prod-renderer condition env)))
+       :documentation "The function that renders the error.")
+   (prod-renderer :type function
+                  :initarg :prod-renderer
+                  :accessor prod-renderer
+                  :initform #'render-prod
+                  :documentation "The function that will be called to render
+                                  the actual error page"))
   (:documentation "Middleware to catch errors."))
 
 (defmethod call ((this <clack-error-middleware>) env)
@@ -111,6 +117,7 @@ If NIL, just a simple error page.")
                       '(:content-type "text/html")
                       (list (funcall (fn this)
                                      (debugp this)
+                                     (prod-renderer this)
                                      (get-output-stream-string str)
                                      condition
                                      env)))))))
