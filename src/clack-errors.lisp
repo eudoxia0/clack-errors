@@ -78,7 +78,7 @@
                       (list key value))))))
 
 (defun render-prod (condition env)
-  (prod-page:index (list :name (ex-name condition)
+  (prod-page:index (list :name (condition-name condition)
                          :url (getf env :path-info)
                          :css (slurp-file *prod-css-path*))))
  
