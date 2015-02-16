@@ -10,6 +10,7 @@ install:
 
 script:
   - cl -e '(ql:quickload :fiveam)'
+       -e '(ql:quickload :closure-template)'
        -e '(setf fiveam:*debug-on-error* t)'
        -e '(setf *debugger-hook*
                  (lambda (c h)
