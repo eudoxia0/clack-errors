@@ -1,3 +1,7 @@
+# clack-errors
+
+[![Build Status](https://travis-ci.org/eudoxia0/clack-errors.svg?branch=master)](https://travis-ci.org/eudoxia0/clack-errors)
+
 ![Development screenshot](https://raw.github.com/eudoxia0/clack-errors/master/screenshot-dev.png)
 ![Production screenshot](https://raw.github.com/eudoxia0/clack-errors/master/screenshot-prod.png)
 
