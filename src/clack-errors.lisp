@@ -81,7 +81,7 @@
   (prod-page:index (list :name (condition-name condition)
                          :url (getf env :path-info)
                          :css (slurp-file *prod-css-path*))))
- 
+
 (defclass <clack-error-middleware> (<middleware>)
   ((debug :type boolean
           :initarg :debug
