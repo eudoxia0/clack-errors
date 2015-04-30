@@ -27,7 +27,7 @@
   (setf *handler*
         (clack:clackup
          (clack.builder:builder
-          (clack-errors:<clack-error-middleware>
+          (clack-errors*clack-error-middleware*
            :debug t)
           *app*)
          :port 8000)))

@@ -1,9 +1,9 @@
 (in-package :cl-user)
 (defpackage clack-errors
-  (:use :cl :clack :clack.response)
+  (:use :cl)
   (:import-from :trivial-backtrace
                 :print-backtrace)
-  (:export :<clack-error-middleware>))
+  (:export :*clack-error-middleware*))
 (in-package :clack-errors)
 
 (defun slurp-file (path)
@@ -82,42 +82,18 @@
                          :url (getf env :path-info)
                          :css (slurp-file *prod-css-path*))))
 
-(defclass <clack-error-middleware> (<middleware>)
-  ((debug :type boolean
-          :initarg :debug
-          :accessor debugp
-          :initform t
-          :documentation "If T, show the full backtrace etc.
-If NIL, just a simple error page.")
-   (fn :type function
-       :initarg :fn
-       :accessor fn
-       :initform (lambda (debugp prod-renderer backtrace condition env)
-                   (if debugp
+(defparameter *clack-error-middleware*
+  (lambda (app &key (debug t) (prod-render #'render-prod))
+    (lambda (env)
+      (handler-case
+          (funcall app env)
+        (t (condition)
+          (let ((backtrace (with-output-to-string (stream)
+                             (write-string (print-backtrace condition :output nil)
+                                           stream))))
+            (list 500
+                  '(:content-type "text/html")
+                  (list
+                   (if debug
                        (render backtrace condition env)
-                       (funcall prod-renderer condition env)))
-       :documentation "The function that renders the error.")
-   (prod-renderer :type function
-                  :initarg :prod-renderer
-                  :accessor prod-renderer
-                  :initform #'render-prod
-                  :documentation "The function that will be called to render
-                                  the actual error page"))
-  (:documentation "Middleware to catch errors."))
-
-(defmethod call ((this <clack-error-middleware>) env)
-  (let ((str (make-string-output-stream)))
-    (handler-case (handler-bind
-                      ((t #'(lambda (condition)
-                              (write-string (print-backtrace condition :output nil)
-                                            str))))
-                    (call-next this env))
-      (t (condition) (list
-                      500
-                      '(:content-type "text/html")
-                      (list (funcall (fn this)
-                                     (debugp this)
-                                     (prod-renderer this)
-                                     (get-output-stream-string str)
-                                     condition
-                                     env)))))))
+                       (funcall prod-render condition env))))))))))
