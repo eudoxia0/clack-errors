@@ -5,16 +5,11 @@
            :stop))
 (in-package :clack-errors-test.app)
 
-(defparameter *app* (make-instance 'ningle:<app>))
-
-(setf (ningle:route *app* "/no-error")
-      "Nothing to see here.")
-
-(setf (ningle:route *app* "/error")
-      (lambda (params)
-        (declare (ignore params))
-        (error "test")
-        "This will never actually appear."))
+(defparameter *app*
+  (lambda (env)
+    (if (string= (getf env :path-info) "/no-error")
+        '(200 (:content-type "text/plain") ("Nothing to see here"))
+        (error "test"))))
 
 (defparameter *handler* nil)
 

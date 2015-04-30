@@ -18,7 +18,6 @@
    (clack-errors-test.app:start)))
 
 (test routes
-  (print (drakma:http-request "http://localhost:8000/no-error"))
   (is
    (equal (request-code "/no-error")
           200))
