@@ -10,6 +10,7 @@ install:
   # Clone the latest copies of external libraries
   - git clone https://github.com/fukamachi/lack.git ~/lisp/lack
   - git clone https://github.com/fukamachi/clack.git ~/lisp/clack
+  - git clone https://github.com/fukamachi/ningle.git ~/lisp/ningle
 
 script:
   - cl -l fiveam -l closure-template
