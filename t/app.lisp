@@ -1,35 +1,29 @@
 (in-package :cl-user)
 (defpackage clack-errors-test.app
-  (:use :cl :ningle)
+  (:use :cl)
   (:export :start
            :stop))
 (in-package :clack-errors-test.app)
 
-(defvar *app* (make-instance '<app>))
+(defparameter *app* (make-instance 'ningle:<app>))
 
-(setf (route *app* "/no-error")
+(setf (ningle:route *app* "/no-error")
       "Nothing to see here.")
 
-(defun fun-b ()
-  (error "test"))
-
-(defun fun-a (params)
-  (fun-b))
-
-(setf (route *app* "/error")
+(setf (ningle:route *app* "/error")
       (lambda (params)
-        (fun-a params)
+        (declare (ignore params))
+        (error "test")
         "This will never actually appear."))
 
-(defvar *handler* nil)
+(defparameter *handler* nil)
 
 (defun start ()
   (setf *handler*
         (clack:clackup
-         (clack.builder:builder
-          (clack-errors*clack-error-middleware*
-           :debug t)
-          *app*)
+         (funcall clack-errors:*clack-error-middleware*
+                  *app*
+                  :debug t)
          :port 8000)))
 
 (defun stop ()
