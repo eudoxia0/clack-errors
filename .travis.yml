@@ -7,10 +7,12 @@ env:
 install:
   # Install cl-travis
   - curl https://raw.githubusercontent.com/luismbo/cl-travis/master/install.sh | bash
+  # Clone the latest copies of external libraries
+  - git clone https://github.com/fukamachi/lack.git ~/lisp/lack
+  - git clone https://github.com/fukamachi/clack.git ~/lisp/clack
 
 script:
-  - cl -e '(ql:quickload :fiveam)'
-       -e '(ql:quickload :closure-template)'
+  - cl -l fiveam -l closure-template
        -e '(setf fiveam:*debug-on-error* t)'
        -e '(setf *debugger-hook*
                  (lambda (c h)
