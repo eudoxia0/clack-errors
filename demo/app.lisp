@@ -1,37 +1,37 @@
 (defpackage clack-errors-demo
-  (:use :cl :clack.builder :ningle)
-  (:import-from :cl-markup
-                :html5)
-  (:export :stop))
+  (:use :cl)
+  (:export :start
+           :stop))
 (in-package :clack-errors-demo)
-(defvar *app* (make-instance '<app>))
 
-(setf (route *app* "/")
-      (html5
-       (:a :href "/no-error" "Error-free page") (:br)
-       (:a :href "/error" "Error page")))
+(defmacro html-response (&rest body)
+  `(list 200
+         (list :content-type "text/html")
+         (list (markup:html5 ,@body))))
 
-(setf (route *app* "/no-error")
-      (html5 (:h1 "Nothing to see here.")))
+(defparameter *app*
+  (lambda (env)
+    (let ((url (getf env :path-info)))
+      (cond
+        ((string= url "/")
+         (html-response
+          (:a :href "/no-error" "Error-free page") (:br)
+          (:a :href "/error" "Error page")))
+        ((string= url "/no-error")
+         (html-response
+          (:h1 "Nothing to see here.")))
+        ((string= url "/error")
+         (error "test"))))))
 
-(defun fun-b ()
-  (error "test"))
+(defparameter *handler* nil)
 
-(defun fun-a (params)
-  (fun-b))
-
-(setf (route *app* "/error")
-      (lambda (params)
-        (fun-a params)
-        (html5 (:h1 "This will never actually appear."))))
-
-(defparameter *handler*
-  (clack:clackup
-   (clack.builder:builder
-    (clack-errors:<clack-error-middleware>
-     :debug t)
-    *app*)
-   :port 8000))
+(defun start ()
+  (setf *handler*
+        (clack:clackup
+         (funcall clack-errors:*clack-error-middleware*
+                  *app*
+                  :debug t)
+         :port 8000)))
 
 (defun stop ()
   (clack:stop *handler*))
