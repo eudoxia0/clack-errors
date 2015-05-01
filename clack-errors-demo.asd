@@ -7,7 +7,6 @@
   :author "Fernando Borretti"
   :license "LLGPL"
   :depends-on (:clack-errors
-               :ningle
                :cl-markup)
   :components ((:module "demo"
                 :components

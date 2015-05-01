@@ -4,8 +4,7 @@
   :description "clack-errors tests"
   :depends-on (:clack-errors
                :fiveam
-               :drakma
-               :ningle)
+               :drakma)
   :components ((:module "t"
                 :serial t
                 :components
