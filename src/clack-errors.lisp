@@ -6,13 +6,6 @@
   (:export :*clack-error-middleware*))
 (in-package :clack-errors)
 
-(defun slurp-file (path)
-  ;; Credit: http://www.ymeme.com/slurping-a-file-common-lisp-83.html
-  (with-open-file (stream path)
-    (let ((seq (make-array (file-length stream) :element-type 'character :fill-pointer t)))
-      (setf (fill-pointer seq) (read-sequence seq stream))
-      seq)))
-
 (defparameter *dev-css-path*
   (merge-pathnames
    #p"static/style-dev.css"
@@ -33,6 +26,14 @@
    #p"static/highlight-lisp/highlight-lisp.js"
    (asdf:component-pathname (asdf:find-system :clack-errors))))
 
+(defparameter +dev-template+
+  (djula:compile-template*
+   (asdf:system-relative-pathname :clack-errors #p"templates/dev-page.html")))
+
+(defparameter +prod-template+
+  (djula:compile-template*
+   (asdf:system-relative-pathname :clack-errors #p"templates/prod-page.html")))
+
 (defun condition-name (condition)
   (symbol-name (class-name (class-of condition))))
 
@@ -43,7 +44,8 @@
 (defun slot-values (obj)
   (loop for slot in (condition-slots obj)
         collecting
-        (list (symbol-name slot) (slot-value obj slot))))
+        (list :slot (symbol-name slot)
+              :value (slot-value obj slot))))
 
 (defparameter +backtrace-regex+ "\\n\\w*\\d+:"
   "A regular expression to split backtraces")
@@ -62,25 +64,29 @@
 
 (defun render (bt condition env)
   (let* ((backtrace (parse-backtrace bt)))
-    (dev-page:index
-     (list :name (condition-name condition)
-           :slots (slot-values condition)
-           :datetime (nth 1 backtrace)
-           :backtrace (subseq (caddr backtrace) 6)
-           :url (getf env :path-info)
-           :method (getf env :request-method)
-           :query (getf env :query-string)
-           :css (concatenate 'string
-                             (slurp-file *dev-css-path*)
-                             (slurp-file *highlight-css*))
-           :js (slurp-file *highlight-js*)
-           :env (loop for (key value) on env by #'cddr collecting
-                      (list key value))))))
+    (djula:render-template* +dev-template+
+                            nil
+                            :name (condition-name condition)
+                            :slots (slot-values condition)
+                            :datetime (nth 1 backtrace)
+                            :backtrace (subseq (caddr backtrace) 6)
+                            :url (getf env :path-info)
+                            :method (getf env :request-method)
+                            :query (getf env :query-string)
+                            :css (concatenate 'string
+                                              (uiop:read-file-string *dev-css-path*)
+                                              (uiop:read-file-string *highlight-css*))
+                            :js (uiop:read-file-string *highlight-js*)
+                            :env (loop for (key value) on env by #'cddr collecting
+                                   (list :key key
+                                         :value value)))))
 
 (defun render-prod (condition env)
-  (prod-page:index (list :name (condition-name condition)
-                         :url (getf env :path-info)
-                         :css (slurp-file *prod-css-path*))))
+  (djula:render-template* +prod-template+
+                          nil
+                          :name (condition-name condition)
+                          :url (getf env :path-info)
+                          :css (uiop:read-file-string *prod-css-path*)))
 
 (defparameter *clack-error-middleware*
   (lambda (app &key (debug t) (prod-render #'render-prod))

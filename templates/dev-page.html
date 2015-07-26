@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{ name }} @ {{ url }}</title>
+    <style>
+     {{ css | safe }}
+    </style>
+    <script>
+     {{ js | safe }}
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1 class='error-name'>{{ name }}
+        <small class='url'>{{ url }}</small>
+      </h1>
+      <span class='date-time'>{{ datetime }}</span>
+    </header>
+    <div class='backtrace'>
+      <h2>Backtrace</h2>
+      <ol>
+        {% for frame in backtrace %}
+          <li class='frame'>
+            <pre><code class='lisp'>{{ frame }}</code></pre>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+    <div class='slots'>
+      <h2>Slots</h2>
+      <dl>
+        {% for slot in slots %}
+          <dt>
+            <code class='slot-name'>{{ slot.name }}</code>
+          </dt>
+          <dd>
+            {% if slot.value %}
+              <pre><code class='slot-value lisp'>{{ slot.value }}</code></pre>
+            {% else %}
+              Unbound.
+            {% endif %}
+          </dd>
+        {% endfor %}
+      </dl>
+    </div>
+    <hr>
+    <div class='req'>
+      <h2>Request</h2>
+      <dl>
+        {% for pair in env %}
+          <dt>
+            <code class='param-name'>{{ pair.key }}</code>
+          </dt>
+          <dd>
+            <code class='param-value'>{{ pair.value }}</code>
+          </dd>
+        {% endfor %}
+      </dl>
+    </div>
+    <script>
+     HighlightLisp.highlight_auto();
+    </script>
+  </body>
+</html>

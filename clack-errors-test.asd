@@ -3,6 +3,7 @@
   :license "LLGPL"
   :description "clack-errors tests"
   :depends-on (:clack-errors
+               :clack
                :fiveam
                :drakma)
   :components ((:module "t"
