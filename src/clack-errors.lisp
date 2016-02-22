@@ -1,9 +1,11 @@
 (in-package :cl-user)
 (defpackage clack-errors
+  (:nicknames :lack.middleware.clack.errors)
   (:use :cl)
   (:import-from :trivial-backtrace
                 :print-backtrace)
-  (:export :*clack-error-middleware*))
+  (:export :*clack-error-middleware*
+           :*lack-middleware-clack-errors*))
 (in-package :clack-errors)
 
 (defparameter *dev-css-path*
@@ -103,3 +105,5 @@
                    (if debug
                        (render backtrace condition env)
                        (funcall prod-render condition env))))))))))
+
+(setf (symbol-value '*lack-middleware-clack-errors*) *clack-error-middleware*)
