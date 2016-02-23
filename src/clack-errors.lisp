@@ -1,9 +1,11 @@
 (in-package :cl-user)
 (defpackage clack-errors
+  (:nicknames :lack.middleware.clack.errors)
   (:use :cl)
   (:import-from :trivial-backtrace
                 :print-backtrace)
-  (:export :*clack-error-middleware*))
+  (:export :*clack-error-middleware*
+           :*lack-middleware-clack-errors*))
 (in-package :clack-errors)
 
 (defparameter *dev-css-path*
@@ -91,17 +93,17 @@
 (defparameter *clack-error-middleware*
   (lambda (app &key (debug t) (prod-render #'render-prod))
     (lambda (env)
-      (block nil
-        (handler-bind ((error
-                         (lambda (condition)
-                           (let ((backtrace (with-output-to-string (stream)
-                                              (write-string (print-backtrace condition :output nil)
-                                                            stream))))
-                             (return
-                               (list 500
-                                     '(:content-type "text/html")
-                                     (list
-                                      (if debug
-                                          (render backtrace condition env)
-                                          (funcall prod-render condition env)))))))))
-          (funcall app env))))))
+      (handler-case
+          (funcall app env)
+        (t (condition)
+          (let ((backtrace (with-output-to-string (stream)
+                             (write-string (print-backtrace condition :output nil)
+                                           stream))))
+            (list 500
+                  '(:content-type "text/html")
+                  (list
+                   (if debug
+                       (render backtrace condition env)
+                       (funcall prod-render condition env))))))))))
+
+(setf (symbol-value '*lack-middleware-clack-errors*) *clack-error-middleware*)
