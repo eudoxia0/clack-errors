@@ -93,17 +93,21 @@
 (defparameter *clack-error-middleware*
   (lambda (app &key (debug t) (prod-render #'render-prod))
     (lambda (env)
-      (handler-case
+      (block nil
+        (handler-bind ((error
+                         (lambda (condition)
+                           (let ((backtrace (with-output-to-string (stream)
+                                              (write-string (print-backtrace condition :output nil)
+                                                            stream))))
+                             (return (list 500
+                                           '(:content-type "text/html")
+                                           (list
+                                             (if debug
+                                                 (render backtrace condition env)
+                                                 (funcall prod-render condition env)))))))))
+          (funcall app env))))))
           (funcall app env)
         (t (condition)
-          (let ((backtrace (with-output-to-string (stream)
-                             (write-string (print-backtrace condition :output nil)
-                                           stream))))
-            (list 500
-                  '(:content-type "text/html")
-                  (list
-                   (if debug
-                       (render backtrace condition env)
-                       (funcall prod-render condition env))))))))))
+          ()))))))
 
 (setf (symbol-value '*lack-middleware-clack-errors*) *clack-error-middleware*)
