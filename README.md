@@ -15,29 +15,22 @@ REPL. This isn't very useful. So now there's this.
 
 # Usage
 
-Simply add the `<clack-error-middleware>` to your application's clackup form.
+This,
 
 ```lisp
 (clack:clackup
-  (builder
-    clack-errors:<clack-error-middleware>
-    *app*))
+  (funcall clack-errors:*clack-error-middleware*
+           *my-clack-app*
+           :debug t)
+  :port 8000)))
 ```
+
+will wrap your Clack up in the clack-errors middleware, start the server and
+return a handler object.
 
 By default, the middleware will show all information. In a production
 environment, you'll want to initialize this with the `:debug` parameter set to
 NIL.
-
-If you use [Envy](https://github.com/fukamachi/envy) to manage configuration,
-you'd initialize it like this:
-
-```lisp
-(clack:clackup
-  (builder
-    (clack-errors:<clack-error-middleware>
-      :debug (getf (envy:config :myapp) :debug))
-    *app*))
-```
 
 ## Using a Custom Error Page
 
@@ -46,15 +39,13 @@ a condition as its argument and returns the HTML string to return to the client.
 
 ```lisp
 (clack:clackup
-  (builder
-    (clack-errors:<clack-error-middleware>
-      :fn (lambda (condition) "500 Internal Server Error")
-    *app*))
+  (funcall clack-errors:*clack-error-middleware*
+    *app*
+    :fn (lambda (condition) "500 Internal Server Error")))
 ```
-
 
 # License
 
-Copyright (c) 2013-2015 Fernando Borretti (eudoxiahp@gmail.com)
+Copyright (c) 2013-2016 Fernando Borretti (eudoxiahp@gmail.com)
 
 Licensed under the LLGPL License.
