@@ -106,8 +106,5 @@
                                                  (render backtrace condition env)
                                                  (funcall prod-render condition env)))))))))
           (funcall app env))))))
-          (funcall app env)
-        (t (condition)
-          ()))))))
 
 (setf (symbol-value '*lack-middleware-clack-errors*) *clack-error-middleware*)
