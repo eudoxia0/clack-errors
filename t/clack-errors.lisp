@@ -1,6 +1,7 @@
 (in-package :cl-user)
 (defpackage clack-errors-test
-  (:use :cl :fiveam))
+  (:use :cl :fiveam)
+  (:export :run-tests))
 (in-package :clack-errors-test)
 
 (def-suite tests
