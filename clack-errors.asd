@@ -16,4 +16,4 @@
                 ((:file "clack-errors"))))
   :long-description #.(uiop:read-file-string
                        (uiop:subpathname *load-pathname* "README.md"))
-  :in-order-to ((test-op (load-op clack-errors-test))))
+  :in-order-to ((test-op (test-op clack-errors-test))))
