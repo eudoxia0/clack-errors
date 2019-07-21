@@ -29,4 +29,5 @@
   (finishes
    (clack-errors-test.app:stop)))
 
-(run! 'tests)
+(defun run-tests ()
+  (run! 'tests))
