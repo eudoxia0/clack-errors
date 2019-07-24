@@ -46,6 +46,6 @@ a condition as its argument and returns the HTML string to return to the client.
 
 # License
 
-Copyright (c) 2013-2016 Fernando Borretti (eudoxiahp@gmail.com)
+Copyright (c) 2013–2019 Fernando Borretti (eudoxiahp@gmail.com)
 
 Licensed under the LLGPL License.
